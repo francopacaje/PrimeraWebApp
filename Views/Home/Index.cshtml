@@ -1,0 +1,33 @@
+﻿@{
+    ViewData["Title"] = "Prueba de conexion";
+}
+
+
+<div class="container mt-5 text-center">
+    <h2>Modulo IA 301: UNIDAD III - Acceso a Datos</h2>
+    <p class="text-muted">Probando conexion ADO.NET con MySQL...</p>
+    @if (ViewBag.MensajeConexion != null)
+    {
+        <div class="alert alert-@ViewBag.EstiloConexion mt-4 shadow-sm animate__animated animate__fadeIn" role="alert">
+            <h4 class="alert-heading">Estado del Servidor</h4>
+            <p class="mb-0">@ViewBag.MensajeConexion</p>
+        </div>
+    }
+    <form class="row g-3">
+        <div class="col-md-6">
+            <label for="inputEmail4" class="form-label">Nombre</label>
+            <input type="email" class="form-control" id="inputEmail4">
+        </div>
+        <div class="col-md-6">
+            <label for="inputPassword4" class="form-label">Contraseña</label>
+            <input type="password" class="form-control" id="inputPassword4">
+        </div>
+        <div class="col-12">
+            <label for="inputAddress" class="form-label">Correo</label>
+            <input type="text" class="form-control" id="inputAddress" placeholder="correoejemplo@gmail.com">
+        </div>
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary">Iniciar Sesion</button>
+        </div>
+    </form>
+</div>

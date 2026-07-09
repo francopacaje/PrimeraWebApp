@@ -1,0 +1,53 @@
+﻿@model PrimeraWebApp.Models.Producto
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">Registrar Nuevo Producto</h4>
+                </div>
+                <div class="card-body">
+
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="alert alert-danger">
+                            @ViewBag.Error
+                        </div>
+                    }
+
+                    <form asp-action="Create" method="post">
+
+                        <div class="mb-3">
+                            <label class="form-label font-weight-bold">Nombre del Producto</label>
+                            <input type="text" name="Nombre" class="form-control" placeholder="Ej: Papas Saco 20kg" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label font-weight-bold">Precio de Venta ($)</label>
+                            <input type="number" name="Precio" class="form-control" min="1" placeholder="Ej: 12000" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label font-weight-bold">Stock Inicial</label>
+                            <input type="number" name="Stock" class="form-control" min="0" placeholder="Ej: 50" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label font-weight-bold">Número ID de Categoría</label>
+                            <input type="number" name="IdCategoria" class="form-control" placeholder="Ej: 1" required />
+                            <small class="text-muted">Ingresa el ID numérico de la categoría creada en MySQL.</small>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a asp-action="Index" class="btn btn-secondary me-md-2">Cancelar</a>
+                            <button type="submit" class="btn btn-success">Guardar Producto</button>
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

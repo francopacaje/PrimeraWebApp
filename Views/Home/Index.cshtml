@@ -1,33 +1,65 @@
 ﻿@{
-    ViewData["Title"] = "Prueba de conexion";
+    ViewData["Title"] = "Panel Principal";
 }
 
-
-<div class="container mt-5 text-center">
-    <h2>Modulo IA 301: UNIDAD III - Acceso a Datos</h2>
-    <p class="text-muted">Probando conexion ADO.NET con MySQL...</p>
+<div class="container mt-4">
+    <!-- Mensaje de estado de la conexión a MySQL (Aprovecha lo que programaste en tu HomeController) -->
     @if (ViewBag.MensajeConexion != null)
     {
-        <div class="alert alert-@ViewBag.EstiloConexion mt-4 shadow-sm animate__animated animate__fadeIn" role="alert">
-            <h4 class="alert-heading">Estado del Servidor</h4>
-            <p class="mb-0">@ViewBag.MensajeConexion</p>
+        <div class="alert alert-@ViewBag.EstiloConexion alert-dismissible fade show shadow-sm text-center mb-4" role="alert">
+            <i class="bi bi-database-check me-2"></i> @ViewBag.MensajeConexion
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
-    <form class="row g-3">
-        <div class="col-md-6">
-            <label for="inputEmail4" class="form-label">Nombre</label>
-            <input type="email" class="form-control" id="inputEmail4">
+
+    <!-- Encabezado de Bienvenida -->
+    <div class="text-center mb-5 p-4 bg-light rounded-3 shadow-sm border">
+        <h1 class="display-5 fw-bold text-dark">Bienvenido al Sistema de Gestión</h1>
+        <p class="lead text-muted mb-0">Comercializadora Arica S.A. — Seleccione un módulo para continuar</p>
+    </div>
+
+    <!-- Módulos de Acceso Rápido -->
+    <div class="row g-4 justify-content-center">
+
+        <!-- Módulo 1: Productos -->
+        <div class="col-md-5 col-lg-4">
+            <div class="card h-100 shadow border-0 rounded-3 text-center">
+                <div class="card-body p-4 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="fs-1 text-primary mb-3">📦</div>
+                        <h4 class="card-title fw-bold">Inventario de Productos</h4>
+                        <p class="card-text text-muted">
+                            Administra el catálogo de productos, edita precios, gestiona stock y registra nuevas referencias.
+                        </p>
+                    </div>
+                    <div class="mt-4">
+                        <a asp-controller="Producto" asp-action="Index" class="btn btn-primary btn-lg w-100 shadow-sm">
+                            Ir a Productos
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="col-md-6">
-            <label for="inputPassword4" class="form-label">Contraseña</label>
-            <input type="password" class="form-control" id="inputPassword4">
+
+        <!-- Módulo 2: Historial de Movimientos -->
+        <div class="col-md-5 col-lg-4">
+            <div class="card h-100 shadow border-0 rounded-3 text-center">
+                <div class="card-body p-4 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="fs-1 text-info mb-3">📋</div>
+                        <h4 class="card-title fw-bold">Historial de Movimientos</h4>
+                        <p class="card-text text-muted">
+                            Consulta la auditoría, registro de entradas, salidas y movimientos de stock del sistema.
+                        </p>
+                    </div>
+                    <div class="mt-4">
+                        <a asp-controller="Historial" asp-action="Index" class="btn btn-info btn-lg text-white w-100 shadow-sm">
+                            Ir al Historial
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="col-12">
-            <label for="inputAddress" class="form-label">Correo</label>
-            <input type="text" class="form-control" id="inputAddress" placeholder="correoejemplo@gmail.com">
-        </div>
-        <div class="col-12">
-            <button type="submit" class="btn btn-primary">Iniciar Sesion</button>
-        </div>
-    </form>
+
+    </div>
 </div>

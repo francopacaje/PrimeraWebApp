@@ -20,7 +20,6 @@ namespace PrimeraWebApp.Controllers
 
             using (MySqlConnection conexion = new MySqlConnection(_connectionString))
             {
-                // Consulta limpia respetando tu INNER JOIN con la columna 'categoria'
                 string query = "SELECT p.id, p.nombre, p.precio, p.stock, c.nombre AS NombreCategoria " +
                                "FROM productos p " +
                                "INNER JOIN categoria c ON p.categoria = c.id_categoria";
@@ -38,7 +37,6 @@ namespace PrimeraWebApp.Controllers
                             {
                                 Id = reader.GetInt32("id"),
                                 Nombre = reader.GetString("nombre"),
-                                // CORRECCIÓN DE SINTAXIS/TIPO: Convertimos explícitamente para evitar caídas si el precio usa decimales o int en MySQL
                                 Precio = Convert.ToInt32(reader["precio"]),
                                 Stock = reader.GetInt32("stock"),
                                 NombreCategoria = reader.GetString("NombreCategoria")
@@ -55,17 +53,16 @@ namespace PrimeraWebApp.Controllers
             return View(listaProductos);
         }
 
-        // Vista para cargar el formulario
+        // Vista para cargar el formulario de creación
         public IActionResult Create()
         {
             return View();
         }
 
-        // 2. INSERTAR PRODUCTO E HISTORIAL (Operación Crítica de la Fase 3)
+        // 2. INSERTAR PRODUCTO E HISTORIAL
         [HttpPost]
         public IActionResult Create(Producto producto)
         {
-            // Validar que el stock no sea negativo (Requisito Obligatorio de la Fase 3 - Contexto 1.b)
             if (producto.Stock < 0)
             {
                 ViewBag.Error = "El stock inicial no puede ser un número negativo.";
@@ -78,7 +75,6 @@ namespace PrimeraWebApp.Controllers
                 {
                     conexion.Open();
 
-                    // PASO A: Insertar el Producto usando comandos parametrizados seguros (Evita Inyección SQL - Punto 2)
                     string queryProducto = "INSERT INTO productos (nombre, precio, stock, categoria) " +
                                            "VALUES (@nombre, @precio, @stock, @categoria); " +
                                            "SELECT LAST_INSERT_ID();";
@@ -87,13 +83,10 @@ namespace PrimeraWebApp.Controllers
                     cmdProd.Parameters.AddWithValue("@nombre", producto.Nombre);
                     cmdProd.Parameters.AddWithValue("@precio", producto.Precio);
                     cmdProd.Parameters.AddWithValue("@stock", producto.Stock);
-                    cmdProd.Parameters.AddWithValue("@categoria", producto.IdCategoria); // Parámetro y nombre alineados correctamente
+                    cmdProd.Parameters.AddWithValue("@categoria", producto.IdCategoria);
 
-                    // Usamos ExecuteScalar() para obtener de inmediato el ID numérico asignado por la base de datos
                     int idProductoReciente = Convert.ToInt32(cmdProd.ExecuteScalar());
 
-                    // PASO B: Insertar de manera automática el registro en la tabla 'historial' (Punto 4.a del Cliente)
-                    // Usamos NOW() de MySQL para la fecha y hora exacta del servidor
                     string queryHistorial = "INSERT INTO historial (id_producto, cantidad_movimiento, tipo_movimiento, fecha_hora) " +
                                             "VALUES (@id_producto, @cantidad, @tipo, NOW())";
 
@@ -102,10 +95,8 @@ namespace PrimeraWebApp.Controllers
                     cmdHist.Parameters.AddWithValue("@cantidad", producto.Stock);
                     cmdHist.Parameters.AddWithValue("@tipo", "INGRESO INICIAL");
 
-                    // Criterio de éxito 3.c: Modifica datos sin retornar filas
                     cmdHist.ExecuteNonQuery();
 
-                    // Criterio de éxito 3.d: Refrescar la página redirigiendo al listado inmediatamente
                     return RedirectToAction("Index");
                 }
                 catch (Exception ex)
@@ -114,6 +105,110 @@ namespace PrimeraWebApp.Controllers
                     return View(producto);
                 }
             }
+        }
+
+        // 3. MOSTRAR FORMULARIO DE EDICIÓN (GET)
+        [HttpGet]
+        public IActionResult Editar(int id)
+        {
+            Producto producto = null;
+
+            using (MySqlConnection conexion = new MySqlConnection(_connectionString))
+            {
+                string query = "SELECT id, nombre, precio, stock, categoria FROM productos WHERE id = @id";
+                MySqlCommand cmd = new MySqlCommand(query, conexion);
+                cmd.Parameters.AddWithValue("@id", id);
+
+                try
+                {
+                    conexion.Open();
+                    using (MySqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            producto = new Producto
+                            {
+                                Id = Convert.ToInt32(reader["id"]),
+                                Nombre = reader["nombre"].ToString(),
+                                Precio = Convert.ToInt32(reader["precio"]),
+                                Stock = Convert.ToInt32(reader["stock"]),
+                                IdCategoria = Convert.ToInt32(reader["categoria"])
+                            };
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    ViewBag.Error = "Error al obtener el producto: " + ex.Message;
+                }
+            }
+
+            if (producto == null)
+            {
+                return RedirectToAction("Index");
+            }
+
+            return View(producto);
+        }
+
+        // 4. GUARDAR EDICIÓN (UPDATE) + REGISTRO EN HISTORIAL (POST)
+        [HttpPost]
+        public IActionResult Editar(Producto producto)
+        {
+            using (MySqlConnection conexion = new MySqlConnection(_connectionString))
+            {
+                conexion.Open();
+                MySqlTransaction transaccion = conexion.BeginTransaction();
+
+                try
+                {
+                    // Update del producto
+                    string queryUpdate = "UPDATE productos SET nombre = @nombre, precio = @precio, stock = @stock, categoria = @categoria WHERE id = @id";
+                    MySqlCommand cmdUpdate = new MySqlCommand(queryUpdate, conexion, transaccion);
+                    cmdUpdate.Parameters.AddWithValue("@nombre", producto.Nombre);
+                    cmdUpdate.Parameters.AddWithValue("@precio", producto.Precio);
+                    cmdUpdate.Parameters.AddWithValue("@stock", producto.Stock);
+                    cmdUpdate.Parameters.AddWithValue("@categoria", producto.IdCategoria);
+                    cmdUpdate.Parameters.AddWithValue("@id", producto.Id);
+
+                    cmdUpdate.ExecuteNonQuery();
+
+                    // Insert en el historial para auditoría
+                    string queryHistorial = "INSERT INTO historial (id_producto, cantidad_movimiento, tipo_movimiento, fecha_hora) " +
+                                            "VALUES (@id_producto, @cantidad, @tipo, NOW())";
+                    MySqlCommand cmdHistorial = new MySqlCommand(queryHistorial, conexion, transaccion);
+                    cmdHistorial.Parameters.AddWithValue("@id_producto", producto.Id);
+                    cmdHistorial.Parameters.AddWithValue("@cantidad", producto.Stock);
+                    cmdHistorial.Parameters.AddWithValue("@tipo", "MODIFICACIÓN DE PRODUCTO");
+
+                    cmdHistorial.ExecuteNonQuery();
+
+                    transaccion.Commit();
+                    return RedirectToAction("Index");
+                }
+                catch (Exception ex)
+                {
+                    transaccion.Rollback();
+                    ViewBag.Error = "Error al actualizar el producto: " + ex.Message;
+                    return View(producto);
+                }
+            }
+        }
+
+        // 5. ELIMINAR PRODUCTO (DELETE)
+        public IActionResult Eliminar(int id)
+        {
+            using (MySqlConnection conexion = new MySqlConnection(_connectionString))
+            {
+                string query = "DELETE FROM productos WHERE id = @id";
+                MySqlCommand cmd = new MySqlCommand(query, conexion);
+                cmd.Parameters.AddWithValue("@id", id);
+
+                conexion.Open();
+                cmd.ExecuteNonQuery();
+            }
+
+            return RedirectToAction("Index");
         }
     }
 }

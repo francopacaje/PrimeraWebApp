@@ -43,7 +43,8 @@ namespace PrimeraWebApp.Controllers
                             HttpContext.Session.SetString("UsuarioNombre", reader.GetString("nombre"));
                             HttpContext.Session.SetString("UsuarioRol", reader.GetString("rol"));
 
-                            return RedirectToAction("Index", "Producto");
+                            // CAMBIO AQUÍ: Ahora redirige al Home (Menú de Tarjetas) en vez de Productos
+                            return RedirectToAction("Index", "Home");
                         }
                         else
                         {

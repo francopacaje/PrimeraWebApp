@@ -4,7 +4,7 @@
     <h2>Gestión de Inventario de Productos</h2>
     <hr />
 
-    <!-- Alertas de Error por si ingresan stock negativo (Requisito 1.b) -->
+    <!-- Alertas de Error por si ingresan stock negativo -->
     @if (ViewBag.Error != null)
     {
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -13,34 +13,29 @@
         </div>
     }
 
-    <!-- CRITERIO DE ÉXITO 3.a: Formulario de ingreso con Bootstrap ARRIBA de la tabla -->
+    <!-- Formulario de ingreso de producto -->
     <div class="card mb-4 shadow-sm">
         <div class="card-header bg-primary text-white">
             <h5 class="mb-0">Nuevo Producto (Acceso Seguro ADO.NET)</h5>
         </div>
         <div class="card-body">
-            <!-- Acción apunta al método Create POST de nuestro controlador -->
             <form asp-action="Create" method="post">
                 <div class="row g-3">
-                    <!-- Input Nombre (Requisito 1.a: name idéntico a C#) -->
                     <div class="col-md-3">
                         <label class="form-label">Nombre del Producto</label>
                         <input type="text" name="Nombre" class="form-control" placeholder="Ej: Arroz 1kg" required />
                     </div>
 
-                    <!-- Input Precio -->
                     <div class="col-md-2">
                         <label class="form-label">Precio ($)</label>
                         <input type="number" name="Precio" class="form-control" placeholder="0" min="0" required />
                     </div>
 
-                    <!-- Input Stock (Validado en controlador para no ser negativo) -->
                     <div class="col-md-2">
                         <label class="form-label">Stock Inicial</label>
                         <input type="number" name="Stock" class="form-control" placeholder="0" required />
                     </div>
 
-                    <!-- Select Categoría (Quemado en HTML temporalmente para pruebas rápidos en casa) -->
                     <div class="col-md-3">
                         <label class="form-label">Categoría</label>
                         <select name="IdCategoria" class="form-select" required>
@@ -52,7 +47,6 @@
                         <small class="text-muted">Verifica los IDs en tu base de datos</small>
                     </div>
 
-                    <!-- Botón de Envío -->
                     <div class="col-md-2 d-flex align-items-end">
                         <button type="submit" class="btn btn-success w-100">
                             <i class="bi bi-plus-circle"></i> Guardar
@@ -77,6 +71,7 @@
                         <th>Precio</th>
                         <th>Stock Actual</th>
                         <th>Categoría</th>
+                        <th style="width: 160px;" class="text-center">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -94,13 +89,17 @@
                                     </span>
                                 </td>
                                 <td>@prod.NombreCategoria</td>
+                                <td class="text-center">
+                                    <a asp-action="Editar" asp-route-id="@prod.Id" class="btn btn-warning btn-sm">Editar</a>
+                                    <a asp-action="Eliminar" asp-route-id="@prod.Id" class="btn btn-danger btn-sm" onclick="return confirm('¿Seguro de eliminar este producto?');">Eliminar</a>
+                                </td>
                             </tr>
                         }
                     }
                     else
                     {
                         <tr>
-                            <td colspan="5" class="text-center text-muted py-4">
+                            <td colspan="6" class="text-center text-muted py-4">
                                 No hay productos registrados en el sistema.
                             </td>
                         </tr>

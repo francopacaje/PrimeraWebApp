@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 20-07-2026 a las 21:56:47
+-- Tiempo de generación: 23-07-2026 a las 01:44:49
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.0.30
 
@@ -37,8 +37,9 @@ CREATE TABLE `categoria` (
 --
 
 INSERT INTO `categoria` (`id_categoria`, `nombre`) VALUES
-(1, 'Congelados'),
-(2, 'Abarrotes');
+(1, 'Abarrotes'),
+(2, 'Bebidas'),
+(3, 'Limpieza');
 
 -- --------------------------------------------------------
 
@@ -54,13 +55,6 @@ CREATE TABLE `historial` (
   `fecha_hora` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Volcado de datos para la tabla `historial`
---
-
-INSERT INTO `historial` (`id_historial`, `id_producto`, `cantidad_movimiento`, `tipo_movimiento`, `fecha_hora`) VALUES
-(1, 4, 14, 'INGRESO INICIAL', '2026-07-18 16:51:54');
-
 -- --------------------------------------------------------
 
 --
@@ -72,18 +66,8 @@ CREATE TABLE `productos` (
   `nombre` varchar(100) NOT NULL,
   `stock` int(11) NOT NULL,
   `precio` decimal(10,2) NOT NULL,
-  `categoria` varchar(50) NOT NULL
+  `categoria` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Volcado de datos para la tabla `productos`
---
-
-INSERT INTO `productos` (`id`, `nombre`, `stock`, `precio`, `categoria`) VALUES
-(1, 'Saco de Fertilizante Agrícola 25kg', 50, 24990.00, 'Insumos'),
-(2, 'Caja de Tomates Locales', 120, 15000.00, 'Frutas y Verduras'),
-(3, 'Malla de Limón de Pica 5kg', 80, 8990.00, 'Frutas y Verduras'),
-(4, 'Fideos 1kg', 14, 0.00, '1');
 
 -- --------------------------------------------------------
 
@@ -120,13 +104,15 @@ ALTER TABLE `categoria`
 -- Indices de la tabla `historial`
 --
 ALTER TABLE `historial`
-  ADD PRIMARY KEY (`id_historial`);
+  ADD PRIMARY KEY (`id_historial`),
+  ADD KEY `fk_historial_productos` (`id_producto`);
 
 --
 -- Indices de la tabla `productos`
 --
 ALTER TABLE `productos`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_productos_categoria` (`categoria`);
 
 --
 -- Indices de la tabla `usuario`
@@ -143,25 +129,41 @@ ALTER TABLE `usuario`
 -- AUTO_INCREMENT de la tabla `categoria`
 --
 ALTER TABLE `categoria`
-  MODIFY `id_categoria` int(255) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id_categoria` int(255) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `historial`
 --
 ALTER TABLE `historial`
-  MODIFY `id_historial` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id_historial` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `productos`
 --
 ALTER TABLE `productos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de la tabla `usuario`
 --
 ALTER TABLE `usuario`
   MODIFY `id_usuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- Restricciones para tablas volcadas
+--
+
+--
+-- Filtros para la tabla `historial`
+--
+ALTER TABLE `historial`
+  ADD CONSTRAINT `fk_historial_productos` FOREIGN KEY (`id_producto`) REFERENCES `productos` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Filtros para la tabla `productos`
+--
+ALTER TABLE `productos`
+  ADD CONSTRAINT `fk_productos_categoria` FOREIGN KEY (`categoria`) REFERENCES `categoria` (`id_categoria`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

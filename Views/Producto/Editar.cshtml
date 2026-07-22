@@ -1,0 +1,41 @@
+﻿@model PrimeraWebApp.Models.Producto
+
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-warning text-dark">
+            <h4 class="mb-0">Editar Producto</h4>
+        </div>
+        <div class="card-body">
+            <form asp-action="Editar" method="post">
+                <!-- Campo oculto para mantener el ID del producto -->
+                <input type="hidden" asp-for="Id" />
+
+                <div class="mb-3">
+                    <label class="form-label font-weight-bold">Nombre del Producto</label>
+                    <input asp-for="Nombre" class="form-control" required />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Precio ($)</label>
+                    <input asp-for="Precio" type="number" class="form-control" required />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Stock</label>
+                    <input asp-for="Stock" type="number" class="form-control" required />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">ID Categoría</label>
+                    <input asp-for="IdCategoria" type="number" class="form-control" required />
+                    <small class="text-muted">Ingresa el ID de la categoría (1: Abarrotes, 2: Bebidas, etc.)</small>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                    <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

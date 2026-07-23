@@ -1,0 +1,32 @@
+﻿@model PrimeraWebApp.Models.Usuario
+
+<div class="container mt-4" style="max-width: 500px;">
+    <h2>Editar Usuario</h2>
+
+    <form asp-action="Edit" method="post">
+        <input type="hidden" asp-for="IdUsuario" />
+
+        <div class="mb-3">
+            <label class="form-label">Nombre Completo</label>
+            <input asp-for="Nombre" class="form-control" required />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Correo Electrónico</label>
+            <input asp-for="Correo" type="email" class="form-control" required />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Contraseña</label>
+            <input asp-for="Contrasena" type="text" class="form-control" required />
+            <small class="text-muted">Puedes modificar la contraseña aquí.</small>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Rol</label>
+            <select asp-for="Rol" class="form-select">
+                <option value="Administrador">Administrador</option>
+                <option value="Usuario">Usuario</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-warning">Actualizar</button>
+        <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>

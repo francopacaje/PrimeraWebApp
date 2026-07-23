@@ -26,6 +26,12 @@
                         <input type="text" name="Nombre" class="form-control" placeholder="Ej: Arroz 1kg" required />
                     </div>
 
+                    <!-- NUEVO CAMPO: Descripción -->
+                    <div class="col-md-3">
+                        <label class="form-label">Descripción</label>
+                        <input type="text" name="Descripcion" class="form-control" placeholder="Ej: Arroz grado 1 de selección" />
+                    </div>
+
                     <div class="col-md-2">
                         <label class="form-label">Precio ($)</label>
                         <input type="number" name="Precio" class="form-control" placeholder="0" min="0" required />
@@ -36,7 +42,7 @@
                         <input type="number" name="Stock" class="form-control" placeholder="0" required />
                     </div>
 
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <label class="form-label">Categoría</label>
                         <select name="IdCategoria" class="form-select" required>
                             <option value="">-- Seleccione --</option>
@@ -44,12 +50,11 @@
                             <option value="2">Bebidas / Líquidos</option>
                             <option value="3">Limpieza</option>
                         </select>
-                        <small class="text-muted">Verifica los IDs en tu base de datos</small>
                     </div>
 
-                    <div class="col-md-2 d-flex align-items-end">
-                        <button type="submit" class="btn btn-success w-100">
-                            <i class="bi bi-plus-circle"></i> Guardar
+                    <div class="col-12 text-end mt-3">
+                        <button type="submit" class="btn btn-success px-4">
+                            <i class="bi bi-plus-circle"></i> Guardar Producto
                         </button>
                     </div>
                 </div>
@@ -66,8 +71,9 @@
             <table class="table table-striped table-hover mb-0">
                 <thead class="table-dark">
                     <tr>
-                        <th style="width: 80px;">ID</th>
+                        <th style="width: 60px;">ID</th>
                         <th>Nombre del Producto</th>
+                        <th>Descripción</th> <!-- NUEVA CABECERA -->
                         <th>Precio</th>
                         <th>Stock Actual</th>
                         <th>Categoría</th>
@@ -82,6 +88,7 @@
                             <tr>
                                 <td>@prod.Id</td>
                                 <td>@prod.Nombre</td>
+                                <td>@prod.Descripcion</td> <!-- NUEVO DATO EN LA TABLA -->
                                 <td>$@prod.Precio.ToString("N0")</td>
                                 <td>
                                     <span class="badge @(prod.Stock <= 5 ? "bg-danger" : "bg-success")">
@@ -99,7 +106,8 @@
                     else
                     {
                         <tr>
-                            <td colspan="6" class="text-center text-muted py-4">
+                            <td colspan="7" class="text-center text-muted py-4">
+                                <!-- Ajustado el colspan a 7 por la nueva columna -->
                                 No hay productos registrados en el sistema.
                             </td>
                         </tr>

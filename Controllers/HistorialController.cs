@@ -7,7 +7,7 @@ namespace PrimeraWebApp.Controllers
     public class HistorialController : Controller
     {
         private readonly string _connectionString;
-
+            
         public HistorialController(IConfiguration configuration)
         {
             _connectionString = configuration.GetConnectionString("DefaultConnection");
@@ -20,9 +20,13 @@ namespace PrimeraWebApp.Controllers
             using (MySqlConnection conexion = new MySqlConnection(_connectionString))
             {
                 // Unimos con productos para ver el nombre del producto en vez de solo el ID
-                string query = "SELECT h.id_historial, p.nombre AS NombreProducto, h.cantidad_movimiento, h.tipo_movimiento, h.fecha_hora " +
+                string query = "SELECT h.id_historial, " +
+                               "COALESCE(p.nombre, 'Producto Eliminado') AS NombreProducto, " +
+                               "h.cantidad_movimiento, h.tipo_movimiento, h.fecha_hora, " +
+                               "COALESCE(u.nombre, 'Sin Usuario') AS NombreUsuario " +
                                "FROM historial h " +
-                               "INNER JOIN productos p ON h.id_producto = p.id " +
+                               "LEFT JOIN productos p ON h.id_producto = p.id " +
+                               "LEFT JOIN usuario u ON h.id_usuario = u.id_usuario " +
                                "ORDER BY h.fecha_hora DESC";
 
                 MySqlCommand cmd = new MySqlCommand(query, conexion);
@@ -40,7 +44,8 @@ namespace PrimeraWebApp.Controllers
                                 NombreProducto = reader["NombreProducto"].ToString(),
                                 CantidadMovimiento = Convert.ToInt32(reader["cantidad_movimiento"]),
                                 TipoMovimiento = reader["tipo_movimiento"].ToString(),
-                                FechaHora = Convert.ToDateTime(reader["fecha_hora"])
+                                FechaHora = Convert.ToDateTime(reader["fecha_hora"]),
+                                NombreUsuario = reader["NombreUsuario"] != DBNull.Value ? reader["NombreUsuario"].ToString() : "sin usuario"
                             });
                         }
                     }

@@ -3,9 +3,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+builder.Services.AddDistributedMemoryCache(); // Para almacenar la sesión en memoria
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30); // La sesión dura 30 minutos
+    options.IdleTimeout = TimeSpan.FromMinutes(60); // La sesión dura 30 minutos
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });

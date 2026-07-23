@@ -1,20 +1,22 @@
 ﻿@model List<PrimeraWebApp.Models.Historial>
 
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2>📋 Historial de Movimientos de Inventario</h2>
-        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">
-            ⬅️ Volver al Menú
-        </a>
-    </div>
-    <hr />
+@{
+    ViewData["Title"] = "Auditoría de Movimientos";
+}
 
-    <div class="card shadow-sm">
-        <div class="card-header bg-dark text-white">
-            <h5 class="mb-0">Auditoría de Movimientos</h5>
+<div class="container mt-4">
+    <h2>Auditoría de Movimientos</h2>
+
+    @if (ViewBag.Error != null)
+    {
+        <div class="alert alert-danger">
+            @ViewBag.Error
         </div>
+    }
+
+    <div class="card shadow-sm mt-3">
         <div class="card-body p-0">
-            <table class="table table-striped table-hover mb-0">
+            <table class="table table-striped table-hover m-0">
                 <thead class="table-dark">
                     <tr>
                         <th>ID</th>
@@ -22,29 +24,26 @@
                         <th>Cantidad</th>
                         <th>Tipo de Movimiento</th>
                         <th>Fecha y Hora</th>
+                        <th>Usuario Responsable</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @if (Model != null && Model.Count > 0)
-                    {
-                        @foreach (var item in Model)
-                        {
-                            <tr>
-                                <td>@item.IdHistorial</td>
-                                <td><strong>@item.NombreProducto</strong></td>
-                                <td>@item.CantidadMovimiento unidades</td>
-                                <td>
-                                    <span class="badge bg-success">@item.TipoMovimiento</span>
-                                </td>
-                                <td>@item.FechaHora.ToString("dd/MM/yyyy HH:mm:ss")</td>
-                            </tr>
-                        }
-                    }
-                    else
+                    @foreach (var item in Model)
                     {
                         <tr>
-                            <td colspan="5" class="text-center text-muted py-4">
-                                No se han registrado movimientos aún.
+                            <td class="fw-bold">@item.IdHistorial</td>
+                            <td class="fw-bold">@item.NombreProducto</td>
+                            <td>@item.CantidadMovimiento unidades</td>
+                            <td>
+                                <span class="badge bg-success">
+                                    @item.TipoMovimiento
+                                </span>
+                            </td>
+                            <td>@item.FechaHora.ToString("dd-MM-yyyy HH:mm:ss")</td>
+                            <td>
+                                <span class="badge bg-primary">
+                                    @item.NombreUsuario
+                                </span>
                             </td>
                         </tr>
                     }

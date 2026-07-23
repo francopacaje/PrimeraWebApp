@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 23-07-2026 a las 01:44:49
+-- Tiempo de generación: 23-07-2026 a las 17:31:57
 -- Versión del servidor: 10.4.32-MariaDB
--- Versión de PHP: 8.0.30
+-- Versión de PHP: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -52,8 +52,20 @@ CREATE TABLE `historial` (
   `id_producto` int(11) DEFAULT NULL,
   `cantidad_movimiento` int(11) DEFAULT NULL,
   `tipo_movimiento` varchar(20) DEFAULT NULL,
-  `fecha_hora` datetime DEFAULT NULL
+  `fecha_hora` datetime DEFAULT NULL,
+  `id_usuario` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `historial`
+--
+
+INSERT INTO `historial` (`id_historial`, `id_producto`, `cantidad_movimiento`, `tipo_movimiento`, `fecha_hora`, `id_usuario`) VALUES
+(9, 3, 6, 'INGRESO INICIAL', '2026-07-23 10:41:25', 1),
+(10, 3, 2, 'MODIFICACIÓN DE PROD', '2026-07-23 10:41:52', 1),
+(11, 3, 2, 'MODIFICACIÓN DE PROD', '2026-07-23 10:42:57', 1),
+(12, 3, 6, 'MODIFICACIÓN DE PROD', '2026-07-23 10:55:30', 1),
+(13, 3, 6, 'MODIFICACIÓN DE PROD', '2026-07-23 11:23:41', 2);
 
 -- --------------------------------------------------------
 
@@ -64,10 +76,18 @@ CREATE TABLE `historial` (
 CREATE TABLE `productos` (
   `id` int(11) NOT NULL,
   `nombre` varchar(100) NOT NULL,
+  `descripcion` varchar(255) DEFAULT NULL,
   `stock` int(11) NOT NULL,
   `precio` decimal(10,2) NOT NULL,
   `categoria` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `productos`
+--
+
+INSERT INTO `productos` (`id`, `nombre`, `descripcion`, `stock`, `precio`, `categoria`) VALUES
+(3, 'Latas Fanta', 'Es un pack de 6 unidades de la bebida FANTA', 6, 850.00, 2);
 
 -- --------------------------------------------------------
 
@@ -88,7 +108,8 @@ CREATE TABLE `usuario` (
 --
 
 INSERT INTO `usuario` (`id_usuario`, `nombre`, `correo`, `contrasena`, `rol`) VALUES
-(1, 'Administrador', 'admin@comercializadora.cl', '123456', 'Administrador');
+(1, 'Administrador', 'admin@comercializadora.cl', '123456789', 'Administrador'),
+(2, 'Wilson Orellana', 'worellana@comercializadora.cl', '123456', 'Usuario');
 
 --
 -- Índices para tablas volcadas
@@ -105,7 +126,8 @@ ALTER TABLE `categoria`
 --
 ALTER TABLE `historial`
   ADD PRIMARY KEY (`id_historial`),
-  ADD KEY `fk_historial_productos` (`id_producto`);
+  ADD KEY `fk_historial_productos` (`id_producto`),
+  ADD KEY `fk_historial_usuario` (`id_usuario`);
 
 --
 -- Indices de la tabla `productos`
@@ -135,19 +157,19 @@ ALTER TABLE `categoria`
 -- AUTO_INCREMENT de la tabla `historial`
 --
 ALTER TABLE `historial`
-  MODIFY `id_historial` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id_historial` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT de la tabla `productos`
 --
 ALTER TABLE `productos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `usuario`
 --
 ALTER TABLE `usuario`
-  MODIFY `id_usuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id_usuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- Restricciones para tablas volcadas
@@ -157,7 +179,8 @@ ALTER TABLE `usuario`
 -- Filtros para la tabla `historial`
 --
 ALTER TABLE `historial`
-  ADD CONSTRAINT `fk_historial_productos` FOREIGN KEY (`id_producto`) REFERENCES `productos` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `fk_historial_productos` FOREIGN KEY (`id_producto`) REFERENCES `productos` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_historial_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`);
 
 --
 -- Filtros para la tabla `productos`

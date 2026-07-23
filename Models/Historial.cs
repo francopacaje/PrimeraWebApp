@@ -7,5 +7,7 @@
         public int CantidadMovimiento { get; set; }
         public string TipoMovimiento { get; set; }
         public DateTime FechaHora { get; set; }
+
+        public string? NombreUsuario { get; set; }
     }
 }

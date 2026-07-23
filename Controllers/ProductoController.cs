@@ -20,7 +20,7 @@ namespace PrimeraWebApp.Controllers
 
             using (MySqlConnection conexion = new MySqlConnection(_connectionString))
             {
-                string query = "SELECT p.id, p.nombre, p.precio, p.stock, c.nombre AS NombreCategoria " +
+                string query = "SELECT p.id, p.nombre, p.descripcion, p.precio, p.stock, c.nombre AS NombreCategoria " +
                                "FROM productos p " +
                                "INNER JOIN categoria c ON p.categoria = c.id_categoria";
 
@@ -37,6 +37,7 @@ namespace PrimeraWebApp.Controllers
                             {
                                 Id = reader.GetInt32("id"),
                                 Nombre = reader.GetString("nombre"),
+                                Descripcion = reader["descripcion"] != DBNull.Value ? reader["descripcion"].ToString() : "",
                                 Precio = Convert.ToInt32(reader["precio"]),
                                 Stock = reader.GetInt32("stock"),
                                 NombreCategoria = reader.GetString("NombreCategoria")
@@ -59,7 +60,7 @@ namespace PrimeraWebApp.Controllers
             return View();
         }
 
-        // 2. INSERTAR PRODUCTO E HISTORIAL
+        // 2. INSERTAR PRODUCTO E HISTORIAL (CON AUDITORÍA DE USUARIO)
         [HttpPost]
         public IActionResult Create(Producto producto)
         {
@@ -69,31 +70,37 @@ namespace PrimeraWebApp.Controllers
                 return View(producto);
             }
 
+            // Obtener el ID del usuario desde la sesión
+            int? idUsuario = HttpContext.Session.GetInt32("UsuarioId");
+
             using (MySqlConnection conexion = new MySqlConnection(_connectionString))
             {
                 try
                 {
                     conexion.Open();
 
-                    string queryProducto = "INSERT INTO productos (nombre, precio, stock, categoria) " +
-                                           "VALUES (@nombre, @precio, @stock, @categoria); " +
+                    string queryProducto = "INSERT INTO productos (nombre, descripcion, precio, stock, categoria) " +
+                                           "VALUES (@nombre, @descripcion, @precio, @stock, @categoria); " +
                                            "SELECT LAST_INSERT_ID();";
 
                     MySqlCommand cmdProd = new MySqlCommand(queryProducto, conexion);
                     cmdProd.Parameters.AddWithValue("@nombre", producto.Nombre);
+                    cmdProd.Parameters.AddWithValue("@descripcion", string.IsNullOrEmpty(producto.Descripcion) ? (object)DBNull.Value : producto.Descripcion);
                     cmdProd.Parameters.AddWithValue("@precio", producto.Precio);
                     cmdProd.Parameters.AddWithValue("@stock", producto.Stock);
                     cmdProd.Parameters.AddWithValue("@categoria", producto.IdCategoria);
 
                     int idProductoReciente = Convert.ToInt32(cmdProd.ExecuteScalar());
 
-                    string queryHistorial = "INSERT INTO historial (id_producto, cantidad_movimiento, tipo_movimiento, fecha_hora) " +
-                                            "VALUES (@id_producto, @cantidad, @tipo, NOW())";
+                    // Guardar en historial con el id_usuario
+                    string queryHistorial = "INSERT INTO historial (id_producto, cantidad_movimiento, tipo_movimiento, fecha_hora, id_usuario) " +
+                                            "VALUES (@id_producto, @cantidad, @tipo, NOW(), @id_usuario)";
 
                     MySqlCommand cmdHist = new MySqlCommand(queryHistorial, conexion);
                     cmdHist.Parameters.AddWithValue("@id_producto", idProductoReciente);
                     cmdHist.Parameters.AddWithValue("@cantidad", producto.Stock);
                     cmdHist.Parameters.AddWithValue("@tipo", "INGRESO INICIAL");
+                    cmdHist.Parameters.AddWithValue("@id_usuario", (object)idUsuario ?? DBNull.Value);
 
                     cmdHist.ExecuteNonQuery();
 
@@ -115,7 +122,7 @@ namespace PrimeraWebApp.Controllers
 
             using (MySqlConnection conexion = new MySqlConnection(_connectionString))
             {
-                string query = "SELECT id, nombre, precio, stock, categoria FROM productos WHERE id = @id";
+                string query = "SELECT id, nombre, descripcion, precio, stock, categoria FROM productos WHERE id = @id";
                 MySqlCommand cmd = new MySqlCommand(query, conexion);
                 cmd.Parameters.AddWithValue("@id", id);
 
@@ -130,6 +137,7 @@ namespace PrimeraWebApp.Controllers
                             {
                                 Id = Convert.ToInt32(reader["id"]),
                                 Nombre = reader["nombre"].ToString(),
+                                Descripcion = reader["descripcion"] != DBNull.Value ? reader["descripcion"].ToString() : "",
                                 Precio = Convert.ToInt32(reader["precio"]),
                                 Stock = Convert.ToInt32(reader["stock"]),
                                 IdCategoria = Convert.ToInt32(reader["categoria"])
@@ -155,6 +163,9 @@ namespace PrimeraWebApp.Controllers
         [HttpPost]
         public IActionResult Editar(Producto producto)
         {
+            // Obtener el ID del usuario desde la sesión
+            int? idUsuario = HttpContext.Session.GetInt32("UsuarioId");
+
             using (MySqlConnection conexion = new MySqlConnection(_connectionString))
             {
                 conexion.Open();
@@ -162,10 +173,10 @@ namespace PrimeraWebApp.Controllers
 
                 try
                 {
-                    // Update del producto
-                    string queryUpdate = "UPDATE productos SET nombre = @nombre, precio = @precio, stock = @stock, categoria = @categoria WHERE id = @id";
+                    string queryUpdate = "UPDATE productos SET nombre = @nombre, descripcion = @descripcion, precio = @precio, stock = @stock, categoria = @categoria WHERE id = @id";
                     MySqlCommand cmdUpdate = new MySqlCommand(queryUpdate, conexion, transaccion);
                     cmdUpdate.Parameters.AddWithValue("@nombre", producto.Nombre);
+                    cmdUpdate.Parameters.AddWithValue("@descripcion", string.IsNullOrEmpty(producto.Descripcion) ? (object)DBNull.Value : producto.Descripcion);
                     cmdUpdate.Parameters.AddWithValue("@precio", producto.Precio);
                     cmdUpdate.Parameters.AddWithValue("@stock", producto.Stock);
                     cmdUpdate.Parameters.AddWithValue("@categoria", producto.IdCategoria);
@@ -173,13 +184,14 @@ namespace PrimeraWebApp.Controllers
 
                     cmdUpdate.ExecuteNonQuery();
 
-                    // Insert en el historial para auditoría
-                    string queryHistorial = "INSERT INTO historial (id_producto, cantidad_movimiento, tipo_movimiento, fecha_hora) " +
-                                            "VALUES (@id_producto, @cantidad, @tipo, NOW())";
+                    // Guardar en historial con id_usuario
+                    string queryHistorial = "INSERT INTO historial (id_producto, cantidad_movimiento, tipo_movimiento, fecha_hora, id_usuario) " +
+                                            "VALUES (@id_producto, @cantidad, @tipo, NOW(), @id_usuario)";
                     MySqlCommand cmdHistorial = new MySqlCommand(queryHistorial, conexion, transaccion);
                     cmdHistorial.Parameters.AddWithValue("@id_producto", producto.Id);
                     cmdHistorial.Parameters.AddWithValue("@cantidad", producto.Stock);
                     cmdHistorial.Parameters.AddWithValue("@tipo", "MODIFICACIÓN DE PRODUCTO");
+                    cmdHistorial.Parameters.AddWithValue("@id_usuario", (object)idUsuario ?? DBNull.Value);
 
                     cmdHistorial.ExecuteNonQuery();
 
@@ -195,17 +207,36 @@ namespace PrimeraWebApp.Controllers
             }
         }
 
-        // 5. ELIMINAR PRODUCTO (DELETE)
+        // 5. ELIMINAR PRODUCTO (DELETE) CON HISTORIAL
         public IActionResult Eliminar(int id)
         {
+            // Obtener el ID del usuario desde la sesión
+            int? idUsuario = HttpContext.Session.GetInt32("UsuarioId");
+
             using (MySqlConnection conexion = new MySqlConnection(_connectionString))
             {
-                string query = "DELETE FROM productos WHERE id = @id";
-                MySqlCommand cmd = new MySqlCommand(query, conexion);
-                cmd.Parameters.AddWithValue("@id", id);
-
                 conexion.Open();
-                cmd.ExecuteNonQuery();
+
+                try
+                {
+                    // 1. Guardar en historial la eliminación y qué usuario la hizo
+                    string queryHistorial = "INSERT INTO historial (id_producto, cantidad_movimiento, tipo_movimiento, fecha_hora, id_usuario) " +
+                                            "VALUES (@id_producto, 0, 'ELIMINACIÓN DE PRODUCTO', NOW(), @id_usuario)";
+                    MySqlCommand cmdHist = new MySqlCommand(queryHistorial, conexion);
+                    cmdHist.Parameters.AddWithValue("@id_producto", id);
+                    cmdHist.Parameters.AddWithValue("@id_usuario", (object)idUsuario ?? DBNull.Value);
+                    cmdHist.ExecuteNonQuery();
+
+                    // 2. Eliminar el producto
+                    string query = "DELETE FROM productos WHERE id = @id";
+                    MySqlCommand cmd = new MySqlCommand(query, conexion);
+                    cmd.Parameters.AddWithValue("@id", id);
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    ViewBag.Error = "Error al eliminar producto: " + ex.Message;
+                }
             }
 
             return RedirectToAction("Index");
